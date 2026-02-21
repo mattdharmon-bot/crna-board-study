@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuizMode {
+  TUTOR
+  TIMED
+}
+
+model User {
+  id        String        @id @default(cuid())
+  email     String        @unique
+  password  String
+  name      String?
+  role      Role          @default(STUDENT)
+  createdAt DateTime      @default(now())
+  sessions  QuizSession[]
+}
+
+model Topic {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  questions   Question[]
+}
+
+model Question {
+  id          String     @id @default(cuid())
+  topicId     String
+  topic       Topic      @relation(fields: [topicId], references: [id])
+  stem        String
+  options     Json
+  answer      String
+  explanation String
+  difficulty  Difficulty @default(MEDIUM)
+  published   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  attempts    Attempt[]
+}
+
+model QuizSession {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  mode       QuizMode
+  topicId    String?
+  difficulty Difficulty?
+  totalCount Int
+  startedAt  DateTime    @default(now())
+  finishedAt DateTime?
+  attempts   Attempt[]
+}
+
+model Attempt {
+  id         String      @id @default(cuid())
+  sessionId  String
+  session    QuizSession @relation(fields: [sessionId], references: [id])
+  questionId String
+  question   Question    @relation(fields: [questionId], references: [id])
+  selected   String
+  correct    Boolean
+  timeSpent  Int?
+  createdAt  DateTime    @default(now())
+}
