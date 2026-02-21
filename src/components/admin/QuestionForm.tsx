@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { questionSchema, type QuestionInput } from "@/lib/validations/question";
 import { Input } from "@/components/ui/Input";
@@ -28,7 +28,7 @@ export function QuestionForm({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<QuestionInput>({
     resolver: zodResolver(questionSchema),
@@ -62,7 +62,7 @@ export function QuestionForm({
     router.refresh();
   };
 
-  const watchPublished = watch("published");
+  const watchPublished = useWatch({ control, name: "published" });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-2xl">

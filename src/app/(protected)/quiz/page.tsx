@@ -1,10 +1,27 @@
-export const metadata = { title: "Quiz | CRNA Board Study" };
+import { prisma } from "@/lib/prisma";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { QuizConfig } from "@/components/quiz/QuizConfig";
 
-export default function QuizPage() {
+export const metadata = { title: "Configure Quiz | CRNA Board Study" };
+
+export default async function QuizPage() {
+  const topics = await prisma.topic.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+    where: { questions: { some: { published: true } } },
+  });
+
   return (
-    <div>
+    <div className="space-y-6 max-w-xl">
       <h1 className="text-2xl font-bold text-gray-900">Configure Quiz</h1>
-      <p className="text-gray-500 mt-2">Coming in Slice 3.</p>
+      <Card>
+        <CardHeader>
+          <CardTitle>Quiz Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <QuizConfig topics={topics} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
