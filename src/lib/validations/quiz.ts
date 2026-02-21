@@ -4,8 +4,8 @@ import { Difficulty, QuizMode } from "@prisma/client";
 export const quizConfigSchema = z.object({
   topicId: z.string().optional(),
   difficulty: z.nativeEnum(Difficulty).optional(),
-  count: z.number().int().min(1).max(100).default(10),
-  mode: z.nativeEnum(QuizMode).default(QuizMode.TUTOR),
+  count: z.number().int().min(1).max(100),
+  mode: z.nativeEnum(QuizMode),
 });
 
 export const submitAnswerSchema = z.object({

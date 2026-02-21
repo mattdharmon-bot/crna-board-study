@@ -12,8 +12,8 @@ export const questionSchema = z.object({
   }),
   answer: z.enum(["A", "B", "C", "D"]),
   explanation: z.string().min(1, "Explanation is required"),
-  difficulty: z.nativeEnum(Difficulty).default(Difficulty.MEDIUM),
-  published: z.boolean().default(false),
+  difficulty: z.nativeEnum(Difficulty),
+  published: z.boolean(),
 });
 
 export type QuestionInput = z.infer<typeof questionSchema>;
