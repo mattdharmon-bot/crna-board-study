@@ -1,16 +1,14 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import { ReviewList } from "@/components/review/ReviewList";
 
-export const metadata = { title: "Review Missed Questions | CRNA Board Study" };
-
-export default async function ReviewPage() {
+export async function GET() {
   const session = await auth();
-  if (!session) redirect("/login");
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const userId = session.user.id;
 
+  // Get all incorrect attempts, grouped by question, most recently missed first
   const incorrectAttempts = await prisma.attempt.findMany({
     where: { session: { userId }, correct: false },
     include: {
@@ -21,9 +19,9 @@ export default async function ReviewPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  // Deduplicate by question — keep most recent attempt
+  // Deduplicate by question — keep most recent attempt per question
   const seen = new Set<string>();
-  const missed = incorrectAttempts
+  const missedQuestions = incorrectAttempts
     .filter((a) => {
       if (seen.has(a.questionId)) return false;
       seen.add(a.questionId);
@@ -32,24 +30,14 @@ export default async function ReviewPage() {
     .map((a) => ({
       questionId: a.questionId,
       stem: a.question.stem,
-      options: a.question.options as Record<string, string>,
+      options: a.question.options,
       answer: a.question.answer,
       explanation: a.question.explanation,
       difficulty: a.question.difficulty,
       topic: a.question.topic.name,
-      selected: a.selected,
       lastAttempted: a.createdAt.toISOString(),
+      selected: a.selected,
     }));
 
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Review Missed Questions</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          {missed.length} unique question{missed.length !== 1 ? "s" : ""} answered incorrectly
-        </p>
-      </div>
-      <ReviewList missed={missed} />
-    </div>
-  );
+  return NextResponse.json(missedQuestions);
 }

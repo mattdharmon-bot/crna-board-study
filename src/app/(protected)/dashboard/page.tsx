@@ -76,9 +76,11 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-gray-900">
           Welcome back, {session.user.name ?? session.user.email}
         </h1>
-        <Link href="/quiz">
-          <Button size="lg">Start Quiz</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/quiz">
+            <Button size="lg">Start Quiz</Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -88,6 +90,15 @@ export default async function DashboardPage() {
           value={accuracy !== null ? `${accuracy}%` : "—"}
         />
         <StatCard label="Available Questions" value={totalQuestions} />
+      </div>
+
+      <div className="flex gap-3">
+        <Link href="/analytics">
+          <Button variant="secondary" size="sm">View Analytics</Button>
+        </Link>
+        <Link href="/review">
+          <Button variant="secondary" size="sm">Review Missed</Button>
+        </Link>
       </div>
 
       {recentSessions.length > 0 && (
